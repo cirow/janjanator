@@ -18,3 +18,11 @@ Keep the `Support` folder beside the app. Refresh closes Discord and Proton's
 client, ending active calls. Monitoring only checks; you choose when to refresh.
 
 Unofficial, unsigned, and built with readable PowerShell scripts.
+
+Prefer to build your own copy? Download the repository's source ZIP from
+**Code → Download ZIP**, extract it, and follow [Build from source](Support/BUILD.md).
+We recommend the **.NET Framework C# compiler included with Windows**; no Visual
+Studio, modern .NET SDK, or package downloads are needed. The guide includes a
+prompt for your coding agent and a direct compiler command. You do not need to
+disable your firewall, antivirus, or SmartScreen to build it. A local build is
+still unsigned and may still trigger Windows security warnings.
