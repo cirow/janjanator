@@ -13,9 +13,10 @@ $files = @(
     'Support/BUILD.md', 'Support/README.md', 'Support/START HERE.txt',
     'Support/VERSION.txt', 'Support/VALIDATION.md',
     'Support/Discord-Rule-Updater-GUI.ps1', 'Support/Update-DiscordRules.ps1',
-    'Support/Watch-DiscordRules.ps1', 'Support/Janjanator.cmd',
+    'Support/Watch-DiscordRules.ps1', 'Support/Monitor-Startup.ps1', 'Support/Janjanator.cmd',
     'Support/Preview Discord rules.cmd', 'Support/Refresh Discord rules.cmd',
-    'Support/Diagnose Proton settings.cmd', 'Support/tests/Shutdown-Races.Tests.ps1'
+    'Support/Diagnose Proton settings.cmd', 'Support/tests/Shutdown-Races.Tests.ps1',
+    'Support/tests/Monitor-Startup.Tests.ps1'
 )
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem

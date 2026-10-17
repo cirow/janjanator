@@ -39,7 +39,9 @@ jobs:
           }
 
       - name: Run offline regression fixtures
-        run: .\Support\tests\Shutdown-Races.Tests.ps1
+        run: |
+          .\Support\tests\Shutdown-Races.Tests.ps1
+          .\Support\tests\Monitor-Startup.Tests.ps1
 
       - name: Compile launcher and package release
         run: .\Support\Package.ps1

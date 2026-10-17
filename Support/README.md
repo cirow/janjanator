@@ -14,7 +14,15 @@ new changes can notify again. Monitoring uses the same read-only plan as Preview
 and never closes apps or writes Proton settings.
 
 The monitor keeps running when the interface closes. Right-click its system-tray
-icon to open the updater or **Stop monitoring**. It does not start with Windows.
+icon to open the updater or **Stop monitoring**.
+Enable **Start monitor with Windows** in the interface to start monitoring at
+sign-in for your Windows user. Choose the Proton account when enabling it.
+This creates a shortcut in your user Startup folder, without administrator access.
+Uncheck the option to remove that shortcut; stop an already running monitor
+through its tray menu. Click **Start monitor** to begin immediately.
+Keep Janjanator in a permanent folder. If you move it, turn the option off and
+on again so the startup shortcut points to the new location. Startup is off by
+default. Windows Task Manager can also disable the shortcut under Startup apps.
 On first launch, the monitor registers **Janjanator** as a notification
 sender for the current Windows user (no administrator access or startup task).
 It also creates a **Janjanator Monitor** Start-menu shortcut with the

@@ -7,6 +7,7 @@ Add-Type -AssemblyName System.Drawing
 $ErrorActionPreference = 'Stop'
 $updaterPath = Join-Path $PSScriptRoot 'Update-DiscordRules.ps1'
 . $updaterPath
+. (Join-Path $PSScriptRoot 'Monitor-Startup.ps1')
 
 $script:job = $null
 $script:reportLines = New-Object 'System.Collections.Generic.List[string]'
@@ -33,6 +34,7 @@ $sidebar = New-Object Windows.Forms.FlowLayoutPanel
 $sidebar.Dock = 'Fill'
 $sidebar.FlowDirection = 'TopDown'
 $sidebar.WrapContents = $false
+$sidebar.AutoScroll = $true
 $layout.Controls.Add($sidebar, 0, 0)
 $title = New-Object Windows.Forms.Label
 $title.Text = 'Janjanator'
@@ -56,6 +58,30 @@ foreach ($action in @('Preview', 'Refresh', 'Diagnose', 'Start monitor')) {
     $sidebar.Controls.Add($button)
     $script:buttons += $button
 }
+$startupCheck = New-Object Windows.Forms.CheckBox
+$startupCheck.Text = 'Start monitor with Windows'
+$startupCheck.Size = New-Object Drawing.Size(195, 45)
+$startupCheck.Checked = Get-MonitorStartupEnabled
+$startupCheck.Add_Click({
+    $requested = $startupCheck.Checked
+    try {
+        if ($requested) {
+            $account = Select-GuiAccount
+            if (-not $account) { $startupCheck.Checked = $false; return }
+            Set-MonitorStartup -Enabled $true -AccountPath $account
+            Add-ConsoleLine 'Startup enabled for your Windows account. The monitor will start at your next sign-in. Click Start monitor to begin now.'
+            Add-ConsoleLine 'Keep Janjanator in this folder. If you move it, turn this option off and on again to update its startup path.'
+        } else {
+            Set-MonitorStartup -Enabled $false
+            Add-ConsoleLine 'Startup disabled. To stop a monitor that is already running, use its tray menu.'
+        }
+    } catch {
+        $startupCheck.Checked = Get-MonitorStartupEnabled
+        Add-ConsoleLine ('Error: Could not update Windows startup. ' + $_.Exception.Message)
+    }
+})
+$sidebar.Controls.Add($startupCheck)
+$script:buttons += $startupCheck
 $hint = New-Object Windows.Forms.Label
 $hint.Text = "Refresh closes Discord and Proton's client. Active calls will end.`r`n`r`nAfter refreshing, reconnect Proton before reopening Discord."
 $hint.Size = New-Object Drawing.Size(195, 170)

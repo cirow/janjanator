@@ -1,6 +1,6 @@
 #requires -Version 5.1
 [CmdletBinding()]
-param([string]$SettingsPath)
+param([string]$SettingsPath, [switch]$AtSignIn)
 
 . (Join-Path $PSScriptRoot 'Update-DiscordRules.ps1')
 
@@ -154,7 +154,10 @@ if ($MyInvocation.InvocationName -ne '.') {
     $owned = $false
     try {
         try { $owned = $mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $owned = $true }
-        if (-not $owned) { throw 'The Janjanator monitor is already running. Look for its icon in the Windows system tray.' }
+        if (-not $owned) {
+            if ($AtSignIn) { return }
+            throw 'The Janjanator monitor is already running. Look for its icon in the Windows system tray.'
+        }
         $SettingsPath = Resolve-ProtonSettingsPath $SettingsPath
         [void][Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
         [void][Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications, ContentType = WindowsRuntime]
