@@ -1,0 +1,6 @@
+Shareable edition v4
+Explicit progress/failure stages and shutdown verification, discovery of named
+custom Discord folders from running Discord, and a read-only diagnostic report
+with visible app process paths and the complete executable scan.
+Proton starts with its installation folder as the working directory so the
+updater's folder is not used as its startup working directory.

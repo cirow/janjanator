@@ -1,0 +1,7 @@
+Support/Diagnostic report.txt
+Support/Diagnostic report*.txt
+Releases/
+*.tmp
+*.bak
+DiscordRuleBackups/
+UserSettings*.json

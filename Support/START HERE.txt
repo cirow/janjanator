@@ -1,0 +1,35 @@
+JANJANATOR FOR PROTON VPN
+
+Open Janjanator.exe in the main folder.
+Keep the Support folder beside it; the launcher needs its files.
+Extract the complete ZIP before running the tool.
+
+FIRST-TIME SETUP
+1. Install and sign in to the Discord desktop app and Proton VPN.
+2. In Proton VPN, enable Split tunneling, choose Include mode, and apply.
+3. Open Janjanator.exe.
+
+AFTER A DISCORD UPDATE
+1. Click Preview to review proposed changes (optional).
+2. Click Refresh. If asked, select your Proton account file.
+   Refresh closes Discord and Proton's client; active calls will end.
+   It backs up the settings, updates the rules, and reopens Proton.
+3. Reconnect Proton VPN, then reopen Discord, even if Proton shows Connected.
+
+IF SOMETHING GOES WRONG
+Read the last output lines for the error and suggested next step.
+Click Diagnose to save a report in Support\Diagnostic report.txt.
+The report includes local file paths; review it before sharing.
+Diagnose does not close apps or change VPN settings.
+
+OPTIONAL: WATCH FOR UPDATES
+Click Start monitor. It checks once a minute, beginning after one minute,
+and sends a Windows notification if the rules need refreshing.
+Repeated checks stay quiet while the result is unchanged.
+It stays running after this window closes. To stop it, right-click its
+system-tray icon and choose Stop monitoring. It does not start with Windows.
+On first use it registers Janjanator as a Windows notification sender.
+
+The Support folder contains scripts, optional advanced console launchers,
+documentation, and tests. Everyday users only need the main launcher.
+See README.md in Support for advanced options and backup restoration.
