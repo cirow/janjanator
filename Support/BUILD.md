@@ -39,21 +39,24 @@ Windows runner, checks PowerShell syntax, runs offline fixtures, compiles the
 launcher, and publishes the ZIP and SHA-256 file to a GitHub Release. It uses
 GitHub's temporary repository token; do not add your personal PAT as a secret.
 
-Commit and push the workflow before creating a new version tag:
+After pushing the workflow to the default branch, open **Actions → Build and
+release Janjanator → Run workflow**. Select the branch to release and choose
+**major**, **minor**, or **patch** (the default). The workflow finds the highest
+existing stable `vMAJOR.MINOR.PATCH` tag, increments the selected component,
+resets lower components to zero, and creates the tag at the selected commit.
+For example, `v4.2.3` becomes `v5.0.0`, `v4.3.0`, or `v4.2.4`. With no stable
+tags, the starting version is `0.0.0`. Prerelease and unrelated tags are ignored.
 
-```powershell
-git add .github/workflows/release.yml Support/BUILD.md
-git commit -m "Automate Windows release packaging"
-git push origin main
-git tag v4.0.1
-git push origin v4.0.1
-```
+The same run then builds and publishes the release, so no personal token is
+needed to trigger a second workflow. Do not create the release manually first;
+the workflow creates it and attaches the compiled assets. If the build fails
+after the tag is created, rerun the failed jobs to reuse that tag.
 
-Choose a new unused version each time. The workflow runs for tags beginning
-with `v`; pushing only `main` does not publish a release. Existing tags do not
-trigger it retroactively. Follow progress in GitHub's Actions tab, then download
-the assets from Releases. GitHub's automatic source-code ZIP does not replace
-the compiled `Janjanator.zip` asset.
+You can still create and push an unused `v` tag with Git to start a release.
+Pushing only a branch does not publish anything. Existing tags do not trigger
+builds retroactively. Follow progress in Actions, then download the assets from
+Releases. GitHub's automatic source-code ZIP does not replace the compiled
+`Janjanator.zip` asset.
 
 If pushing the workflow with a fine-grained PAT, grant **Workflows: Read and
 write** for this repository in addition to **Contents: Read and write**.

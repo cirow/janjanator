@@ -1,6 +1,17 @@
 name: Build and release Janjanator
 
 on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version increment
+        required: true
+        default: patch
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
   push:
     tags:
       - 'v*'
@@ -9,11 +20,62 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
+  tag:
+    runs-on: windows-2022
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Check out selected source and all tags
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Select or create version tag
+        id: version
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:EVENT_NAME -eq 'push') {
+            "tag=$env:REF_NAME" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+          if ($env:REF_TYPE -ne 'branch') { throw 'Select a branch when creating a version tag.' }
+          $tags = @(git tag --list)
+          if ($LASTEXITCODE -ne 0) { throw 'Could not list existing tags.' }
+          $versions = @($tags | Where-Object { $_ -cmatch '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' } |
+            ForEach-Object { [version]$_.Substring(1) } | Sort-Object -Descending)
+          $latest = [version]'0.0.0'
+          if ($versions.Count) { $latest = $versions[0] }
+          switch ($env:BUMP) {
+            'major' { $next = 'v{0}.0.0' -f ($latest.Major + 1) }
+            'minor' { $next = 'v{0}.{1}.0' -f $latest.Major, ($latest.Minor + 1) }
+            'patch' { $next = 'v{0}.{1}.{2}' -f $latest.Major, $latest.Minor, ($latest.Build + 1) }
+            default { throw 'Invalid version increment.' }
+          }
+          $sha = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Could not resolve selected commit.' }
+          gh api --method POST "repos/$env:GH_REPO/git/refs" -f "ref=refs/tags/$next" -f "sha=$sha"
+          if ($LASTEXITCODE -ne 0) { throw "Could not create tag $next." }
+          "tag=$next" >> $env:GITHUB_OUTPUT
+          "Created tag **$next** at commit $sha." >> $env:GITHUB_STEP_SUMMARY
+
   release:
+    needs: tag
     runs-on: windows-2022
     timeout-minutes: 15
     permissions:
@@ -25,6 +87,7 @@ jobs:
       - name: Check out tagged source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          ref: ${{ needs.tag.outputs.version }}
           persist-credentials: false
 
       - name: Check script syntax
@@ -57,7 +120,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.tag.outputs.version }}
         run: |
           gh release create $env:RELEASE_TAG Releases/Janjanator.zip Releases/Janjanator.zip.sha256 --verify-tag --title "Janjanator $env:RELEASE_TAG" --generate-notes
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release publishing failed.' }
