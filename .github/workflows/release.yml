@@ -1,0 +1,61 @@
+name: Build and release Janjanator
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Check script syntax
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($file in Get-ChildItem Support -Filter '*.ps1' -Recurse) {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              $file.FullName, [ref]$tokens, [ref]$errors)
+            if ($errors.Count) { throw ($errors | Out-String) }
+          }
+
+      - name: Run offline regression fixtures
+        run: .\Support\tests\Shutdown-Races.Tests.ps1
+
+      - name: Compile launcher and package release
+        run: .\Support\Package.ps1
+
+      - name: Verify package checksum
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = ((Get-Content Releases/Janjanator.zip.sha256 -Raw).Trim() -split '\s+')[0]
+          $actual = (Get-FileHash Releases/Janjanator.zip -Algorithm SHA256).Hash
+          if ($actual -ine $expected) { throw 'Release checksum does not match.' }
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create $env:RELEASE_TAG Releases/Janjanator.zip Releases/Janjanator.zip.sha256 --verify-tag --title "Janjanator $env:RELEASE_TAG" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub Release publishing failed.' }
