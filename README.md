@@ -19,6 +19,12 @@ client, ending active calls. Monitoring only checks; you choose when to refresh.
 
 Unofficial, unsigned, and built with readable PowerShell scripts.
 
+## Build instructions for humans and coding agents
+
+Start with **[Support/BUILD.md — build instructions](Support/BUILD.md)**.
+Coding agents can use the **[copyable agent prompt](Support/BUILD.md#prompt-for-your-coding-agent)**
+to review the source and build locally with Windows' built-in .NET Framework compiler.
+
 Prefer to build your own copy? Download the repository's source ZIP from
 **Code → Download ZIP**, extract it, and follow [Build from source](Support/BUILD.md).
 We recommend the **.NET Framework C# compiler included with Windows**; no Visual
